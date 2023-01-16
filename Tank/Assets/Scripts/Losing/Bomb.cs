@@ -8,15 +8,20 @@ public class Bomb : MonoBehaviour
     [SerializeField] private InchangableValues CatalogOfInchangableValues;
     [SerializeField] private EndingGameMethods EndingGame;
 
-    private void OnCollisionEnter2D(Collision2D AnyCollision)
+    private SpriteRenderer SpriteRendererOfThisBomb;
+    private Collider2D ColliderOfThisBomb;
+
+    private void Start()
     {
-        Explode(AnyCollision);
+        SpriteRendererOfThisBomb = GetComponent<SpriteRenderer>();
+        ColliderOfThisBomb = GetComponent<Collider2D>();
     }
+
 
     private void Explode(Collision2D Collision)
     {
-        GetComponent<SpriteRenderer>().enabled = false;
-        GetComponent<Collider2D>().enabled = false;
+        SpriteRendererOfThisBomb.enabled = false;
+        ColliderOfThisBomb.enabled = false;
         ExplosionVisaulization.enabled = true;
 
         int LayerOfCollidedObject = Collision.gameObject.layer;
@@ -36,5 +41,10 @@ public class Bomb : MonoBehaviour
         yield return new WaitForSeconds(DurationOfTheExplosion);
         ExplosionVisaulization.enabled = false;
         StopCoroutine(ExplodeWithoutTheTank());
+    }
+
+    private void OnCollisionEnter2D(Collision2D AnyCollision)
+    {
+        Explode(AnyCollision);
     }
 }

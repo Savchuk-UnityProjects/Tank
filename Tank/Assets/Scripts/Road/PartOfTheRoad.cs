@@ -20,7 +20,7 @@ public class PartOfTheRoad : MonoBehaviour
     {
         if((Tank.transform.position.x - transform.position.x) >= MaximalDistanceFromTank)
         {
-            Wall.transform.position = transform.GetChild(0).position;
+            Wall.transform.position = TheFurthestPoint.position;
             Destroy(gameObject);
         }
     }

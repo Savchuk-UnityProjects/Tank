@@ -20,11 +20,21 @@ public class Tank : MonoBehaviour
     private bool IsLeftButtonPressed = false;
     private bool IsRightButtonPressed = false;
     private Rigidbody2D RigidbodyOfTheTank;
-    private int CurrentQuantityOfTheProjectiles;
     private float CurrentPetrolVolume;
     private int OffsetForScore;
 
-    public void IncreaseTheQuantityOfTheProjectiles()
+    private int m_CurrentQuantityOfTheProjectiles;
+    private int CurrentQuantityOfTheProjectiles
+    {
+        get => m_CurrentQuantityOfTheProjectiles;
+        set
+        {
+            m_CurrentQuantityOfTheProjectiles = value;
+            TextWhichShowsTheQuantityOfTheProjectiles.text = $"{CurrentQuantityOfTheProjectiles}/{MaximumQuantityOfTheProjectiles}";
+        }
+    }
+
+    public void IncreaseQuantityOfProjectiles()
     {
         if (CurrentQuantityOfTheProjectiles < MaximumQuantityOfTheProjectiles)
         {
@@ -34,14 +44,8 @@ public class Tank : MonoBehaviour
 
     public void IncreaseVolumeOfThePetrol(float DeltaVolume)
     {
-        if (CurrentPetrolVolume + DeltaVolume <= MaximumPetrolVolume)
-        {
-            CurrentPetrolVolume += DeltaVolume;
-        }
-        else
-        {
-            CurrentPetrolVolume = MaximumPetrolVolume;
-        }
+        CurrentPetrolVolume += DeltaVolume;
+        CurrentPetrolVolume = Mathf.Clamp(CurrentPetrolVolume, float.NegativeInfinity, MaximumPetrolVolume);
     }
 
     private void Start()
@@ -67,32 +71,26 @@ public class Tank : MonoBehaviour
 
     private void Update()
     {
-        TextWhichShowsTheQuantityOfTheProjectiles.text = $"{CurrentQuantityOfTheProjectiles}/{MaximumQuantityOfTheProjectiles}";
-
-        if (Input.GetButtonDown(CatalogOfInchangableValues.MovingForward) && CurrentPetrolVolume > 0)
+        void EnableBehaviourOnVirtualButton(string VirtualButtonName, Behaviour BehaviourToBeEnabledOnThisButton)
         {
-            MoveForward.enabled = true;
+            if(Input.GetButtonDown(VirtualButtonName))
+            {
+                BehaviourToBeEnabledOnThisButton.enabled = true;
+            }
+            if(Input.GetButtonUp(VirtualButtonName))
+            {
+                BehaviourToBeEnabledOnThisButton.enabled = false;
+            }
         }
-        if (Input.GetButtonUp(CatalogOfInchangableValues.MovingForward))
+        if (CurrentPetrolVolume > 0)
+        {
+            EnableBehaviourOnVirtualButton(CatalogOfInchangableValues.MovingForward, MoveForward);
+            EnableBehaviourOnVirtualButton(CatalogOfInchangableValues.MovingBack, MoveBackward);
+        }
+        else
         {
             MoveForward.enabled = false;
-        }
-        if (CurrentPetrolVolume == 0)
-        {
-            MoveForward.enabled = false;
-        }
-
-        if (Input.GetButtonDown(CatalogOfInchangableValues.MovingBack) && CurrentPetrolVolume > 0)
-        {
-            MoveBackward.enabled = true;
-        }
-        if (Input.GetButtonUp(CatalogOfInchangableValues.MovingBack))
-        {
             MoveBackward.enabled = false;
-        }
-        if (CurrentPetrolVolume == 0)
-        {
-            MoveForward.enabled = false;
         }
 
         IsLeftButtonPressed = Input.GetButton(CatalogOfInchangableValues.RotatingLeft) && CurrentPetrolVolume > 0;
@@ -108,17 +106,19 @@ public class Tank : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (IsLeftButtonPressed)
+        void RotateAlongZAxisIfParameterIsTrue(bool DeterminingParameter, float SlopeDelta)
         {
-            transform.rotation *= Quaternion.AngleAxis(SlopeDeltaInOneFrame, Vector3.forward);
-        }
-        if (IsRightButtonPressed)
-        {
-            transform.rotation *= Quaternion.AngleAxis(-SlopeDeltaInOneFrame, Vector3.forward);
+            if(DeterminingParameter)
+            {
+                transform.rotation *= Quaternion.AngleAxis(SlopeDelta, Vector3.forward);
+            }
         }
 
-        CurrentPetrolVolume -= Mathf.Clamp(0, CoefficientForTheLosingOfThePetrol * Mathf.Abs(RigidbodyOfTheTank.velocity.x), 1);
-        CurrentPetrolVolume = Mathf.Clamp(0, CurrentPetrolVolume, float.PositiveInfinity);
+        RotateAlongZAxisIfParameterIsTrue(IsLeftButtonPressed, SlopeDeltaInOneFrame);
+        RotateAlongZAxisIfParameterIsTrue(IsRightButtonPressed, -SlopeDeltaInOneFrame);
+
+        CurrentPetrolVolume -= Mathf.Clamp01(CoefficientForTheLosingOfThePetrol * Mathf.Abs(RigidbodyOfTheTank.velocity.x));
+        CurrentPetrolVolume = Mathf.Clamp(CurrentPetrolVolume, 0, float.PositiveInfinity);
 
         StripeForPetrolOnTheScreen.localScale = new Vector3(CurrentPetrolVolume / MaximumPetrolVolume, StripeForPetrolOnTheScreen.localScale.y, StripeForPetrolOnTheScreen.localScale.z);
     }

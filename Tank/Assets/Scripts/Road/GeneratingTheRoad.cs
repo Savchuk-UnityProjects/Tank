@@ -23,7 +23,7 @@ public class GeneratingTheRoad : MonoBehaviour
     private void Start()
     {
         SystemRandomObject = new System.Random();
-        TheFurthestPointOnTheFurthestPartOfTheRoad = TheFurthestPartOfTheRoadGameObject.transform.GetChild(0);
+        TheFurthestPointOnTheFurthestPartOfTheRoad = TheFurthestPartOfTheRoadGameObject.GetComponent<PartOfTheRoad>().GetTheFurthestPoint;
     }
 
     private void GenerateOnePartOfTheRoad()
@@ -32,7 +32,7 @@ public class GeneratingTheRoad : MonoBehaviour
         GameObject TheNewPartOfTheRoad = Instantiate(TheFurthestPartOfTheRoadGameObject);
         TheNewPartOfTheRoad.name = "New Part";
         TheNewPartOfTheRoad.transform.position = TheFurthestPointOnTheFurthestPartOfTheRoad.position +
-            new Vector3(LengthOfOnePartTheRoad / 2f * Mathf.Cos(SlopeOfTheNewPartOfTheRoad * Mathf.Deg2Rad), LengthOfOnePartTheRoad / 2f * Mathf.Sin(SlopeOfTheNewPartOfTheRoad * Mathf.Deg2Rad), 0);
+            LengthOfOnePartTheRoad / 2f * new Vector3(Mathf.Cos(SlopeOfTheNewPartOfTheRoad * Mathf.Deg2Rad), Mathf.Sin(SlopeOfTheNewPartOfTheRoad * Mathf.Deg2Rad), 0);
         TheNewPartOfTheRoad.transform.eulerAngles = SlopeOfTheNewPartOfTheRoad * Vector3.forward;
         TheFurthestPartOfTheRoadGameObject = TheNewPartOfTheRoad;
 
