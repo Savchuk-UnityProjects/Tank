@@ -6,7 +6,7 @@ public class IncreasingVolumeOfPetrol : Repairment
 
     private new void OnTriggerEnter2D(Collider2D AnyCollider)
     {
-        base.OnTriggerEnter2D(AnyCollider);
         TheTank.IncreaseVolumeOfThePetrol(DeltaVolume);
+        base.OnTriggerEnter2D(AnyCollider);
     }
 }
